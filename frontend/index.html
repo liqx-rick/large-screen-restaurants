@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快餐连锁店营业情况大屏</title>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 引入 Vue 3 生产版本 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <!-- 引入 Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.5.0/dist/axios.min.js"></script>
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>快餐连锁店营业情况数据分析大屏</h1>
+            <div class="time-info">
+                <span id="current-time">{{ currentTime }}</span>
+                <button @click="refreshData" class="refresh-btn">刷新数据</button>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <!-- 第一行 - 关键指标卡片 -->
+            <section class="kpi-cards">
+                <div class="card" v-for="(stat, index) in keyStats" :key="index">
+                    <div class="card-title">{{ stat.title }}</div>
+                    <div class="card-value">{{ stat.value }}</div>
+                    <div class="card-trend" :class="stat.trend >= 0 ? 'positive' : 'negative'">
+                        {{ stat.trend >= 0 ? '↑' : '↓' }} {{ Math.abs(stat.trend).toFixed(2) }}%
+                    </div>
+                </div>
+            </section>
+
+            <!-- 新增 - 累计统计表格 -->
+            <section class="summary-table-container">
+                <h3>经营汇总表（2024年4月~2025年3月）</h3>
+                <div class="summary-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>统计项目</th>
+                                <th>累计金额</th>
+                                <th>月均值</th>
+                                <th>占总收入比例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in summaryTableData" :key="index" :class="{'highlight': item.highlight, 'positive': item.value > 0 && item.highlight, 'negative': item.value < 0 && item.highlight}">
+                                <td>
+                                    <span :title="item.tooltip || ''" class="tooltip-text">{{ item.name }}</span>
+                                </td>
+                                <td>{{ formatCurrency(item.value) }}</td>
+                                <td>{{ formatCurrency(item.average) }}</td>
+                                <td>{{ item.percentage !== null ? item.percentage.toFixed(2) + '%' : '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 第二行 - 图表 -->
+            <section class="charts-container">
+                <!-- 月度营收趋势图 -->
+                <div class="chart-wrapper">
+                    <h3>月度营收趋势</h3>
+                    <div id="revenue-trend-chart" class="chart"></div>
+                </div>
+                
+                <!-- 成本与营收比例图 -->
+                <div class="chart-wrapper">
+                    <h3>月度营收与成本对比</h3>
+                    <div id="cost-revenue-ratio-chart" class="chart"></div>
+                </div>
+            </section>
+
+            <!-- 第三行 - 图表 -->
+            <section class="charts-container">
+                <!-- 类别分布饼图 -->
+                <div class="chart-wrapper">
+                    <h3>类别分布</h3>
+                    <div id="category-distribution-chart" class="chart"></div>
+                </div>
+                
+                <!-- 月度增长率 -->
+                <div class="chart-wrapper">
+                    <h3>月度环比增长率</h3>
+                    <div id="growth-rate-chart" class="chart"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>数据来源: 快餐连锁店营业情况202404-202503.xlsx | 最后更新: {{ lastUpdated }}</p>
+        </footer>
+    </div>
+
+    <!-- 自定义JS -->
+    <script src="js/dashboard.js"></script>
+</body>
+</html> 
